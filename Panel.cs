@@ -171,6 +171,7 @@ namespace RwcFormations
         {
             if (!_started) return;
             if (!_shown || _guiFailed || GRC.MatchClient.Current == null) return;
+            FontCheck.LogOnce();
             if (Host.OffNotice != null) { DrawOff(); return; }
             try { DrawPanel(); }
             catch (Exception e)
@@ -217,7 +218,7 @@ namespace RwcFormations
             if (GUI.Button(new Rect(x + iw - 104, y, 50, Row - 4), "Move")) _corner = (_corner + 1) % 4;
             if (GUI.Button(new Rect(x + iw - 50, y, 50, Row - 4), "Hide")) { if (_editing != null) StopEditing(false); _shown = false; }
             y += Row;
-            GUI.Label(new Rect(x, y, iw, Row), _ready ? "Deploying: buttons on. F6 hides." : "Off: " + _status);
+            GUI.Label(new Rect(x, y, iw, Row), FontCheck.On ? FontCheck.Sample : _ready ? "Deploying: buttons on. F6 hides." : "Off: " + _status);
             y += Row;
 
             GUI.enabled = _ready && _editing == null;

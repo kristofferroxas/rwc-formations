@@ -9,7 +9,7 @@ namespace RwcFormations
 {
     internal static class Host
     {
-        public const string Version = "0.8.0";
+        public const string Version = "0.8.1";
         public static string Loader = "";      // "BepInEx" or "MelonLoader"
         public static string DataDir = ".";    // where rwc-formations.json lives
         public static string GameDir = ".";    // the game folder (GameAssembly.dll)

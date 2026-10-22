@@ -19,8 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if MELON
+using Il2CppGameRiver;
+using Il2CppGameRiver.Client;
+#else
 using GameRiver;
 using GameRiver.Client;
+#endif
 
 namespace RwcFormations
 {
@@ -158,7 +163,7 @@ namespace RwcFormations
             var all = NewPad();
             foreach (var (m, world) in moves) all.AddMoveData(b.Player, b.Elements[m.Key], world, m.Rot);
             var check = b.Territory.CanMoveUnits(all.moveUnitDatas, false);
-            Plugin.L.LogInfo($"Apply: {moves.Count} moves in one action, check = {check}");
+            Host.Info($"Apply: {moves.Count} moves in one action, check = {check}");
             if (check == PlayerActionCheckResult.OK && b.Player.TryPerformAction(all))
             {
                 r.Moved = moves.Count;
@@ -194,7 +199,7 @@ namespace RwcFormations
             if (r.Failed > 0)
             {
                 r.Detail = string.Join(", ", reasons.Select(kv => $"{kv.Value} {kv.Key}"));
-                Plugin.L.LogInfo($"Apply: {r.Failed} moves refused by the game ({r.Detail})");
+                Host.Info($"Apply: {r.Failed} moves refused by the game ({r.Detail})");
             }
             return r;
         }
@@ -211,13 +216,13 @@ namespace RwcFormations
         // A line per unit to the log, for checking the coordinates on a first run.
         public static void LogBoard(Board b)
         {
-            Plugin.L.LogInfo($"Board: {b.Units.Count} units, side {(b.H > 0 ? "+y" : "-y")}, area (view) [{string.Join(", ", b.Area)}], centre x = {b.CenterX}, local seat {SafeSeat(b)}");
+            Host.Info($"Board: {b.Units.Count} units, side {(b.H > 0 ? "+y" : "-y")}, area (view) [{string.Join(", ", b.Area)}], centre x = {b.CenterX}, local seat {SafeSeat(b)}");
             for (int i = 0; i < b.Units.Count; i++)
             {
                 var u = b.Units[i];
                 var world = b.Elements[i].GetMapElement().GetPosition();
                 var std = b.Map.ConvertToStandardWorldPosition(b.Player, world);
-                Plugin.L.LogInfo($"  unit {u.Unit} view ({u.X}, {u.Y}) world ({world.x}, {world.y}) std ({std.x}, {std.y}) rot {u.Rot} movable {u.Movable}");
+                Host.Info($"  unit {u.Unit} view ({u.X}, {u.Y}) world ({world.x}, {world.y}) std ({std.x}, {std.y}) rot {u.Rot} movable {u.Movable}");
             }
         }
 

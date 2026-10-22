@@ -69,19 +69,19 @@ namespace RwcFormations
         }
     }
 
-    [HarmonyPatch(typeof(GameRiver.Client.InputController), nameof(GameRiver.Client.InputController.IsBlockedByUI))]
+    [HarmonyPatch(typeof(GRC.InputController), nameof(GRC.InputController.IsBlockedByUI))]
     internal static class InputBlockedHook
     {
         private static void Postfix(ref bool __result) { if (!__result && ClickBlock.MouseOverPanel) __result = true; }
     }
 
-    [HarmonyPatch(typeof(GameRiver.Client.InputController), nameof(GameRiver.Client.InputController.CheckIsBlockedByUI))]
+    [HarmonyPatch(typeof(GRC.InputController), nameof(GRC.InputController.CheckIsBlockedByUI))]
     internal static class InputCheckBlockedHook
     {
         private static void Postfix(ref bool __result) { if (!__result && ClickBlock.MouseOverPanel) __result = true; }
     }
 
-    [HarmonyPatch(typeof(GameRiver.Client.GRUIManager), nameof(GameRiver.Client.GRUIManager.CheckIsBlockedByUI))]
+    [HarmonyPatch(typeof(GRC.GRUIManager), nameof(GRC.GRUIManager.CheckIsBlockedByUI))]
     internal static class UIManagerBlockedHook
     {
         private static void Postfix(ref bool __result) { if (!__result && ClickBlock.MouseOverPanel) __result = true; }

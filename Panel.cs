@@ -1,6 +1,6 @@
-// RWC Formations 0.6.0: save your unit positioning and put it back with a click,
-// as saved or mirrored left to right. A BepInEx 6 (IL2CPP) plugin, separate from
-// the sim plugin (RwcSimProbe), never deployed with the website.
+// RWC Formations 0.7.0: save your unit positioning and put it back with a click,
+// as saved or mirrored left to right. The panel: loader-free (0.7.0), driven by
+// BepInExPlugin.cs or MelonMod.cs. Separate from the sim plugin (RwcSimProbe).
 //
 // In a game, during deployment:
 //   F6                    show / hide the panel
@@ -11,84 +11,21 @@
 //                         as a share code on the clipboard, Share.cs) and Paste (add one). The list shows only the
 //                         layouts whose unit types are all on your board ("Show all" for the rest).
 //   Ctrl+Alt+1..9         place listed layout 1..9 (Ctrl+Alt+Shift = mirrored)
-// Layouts live in BepInEx/rwc-formations.json. Clicks on the panel don't reach the
+// Layouts live in rwc-formations.json in the loader's data folder (Host.DataDir:
+// BepInEx/ or UserData/). Clicks on the panel don't reach the
 // map (ClickBlock.cs).
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BepInEx;
-using BepInEx.Logging;
-using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
 
 namespace RwcFormations
 {
-    [BepInPlugin("com.rhinowaspcult.formations", "RWC Formations", Version)]
-    public class Plugin : BasePlugin
+    public class Panel
     {
-        public const string Version = "0.6.0";
-        internal static ManualLogSource L;
-
-        public override void Load()
-        {
-            L = Log;
-            ClassInjector.RegisterTypeInIl2Cpp<FormationBehaviour>();
-            var go = new GameObject("RwcFormations");
-            UnityEngine.Object.DontDestroyOnLoad(go);
-            go.hideFlags = HideFlags.HideAndDontSave;
-            go.AddComponent<FormationBehaviour>();
-            // While a name is being typed, the game's own keyboard shortcuts and
-            // camera keys are held back (each patched on its own: one failing
-            // leaves the others).
-            var harmony = new Harmony("com.rhinowaspcult.formations");
-            var installed = new List<string>();
-            // 0.3.0: the game's "mouse is over UI" check also says yes over the panel.
-            foreach (var t in new[] { typeof(ShortcutKeyBlock), typeof(OrbitKeyBlock), typeof(ZoomKeyBlock),
-                                      typeof(InputBlockedHook), typeof(InputCheckBlockedHook), typeof(UIManagerBlockedHook) })
-            {
-                try { harmony.PatchAll(t); installed.Add(t.Name); }
-                catch (Exception e) { L.LogError($"Hook {t.Name} failed: {e.Message}"); }
-            }
-            L.LogInfo($"RWC Formations {Version} loaded. F6 = panel; Ctrl+Alt+1..9 = place layout (with Shift = mirrored). Hooks: {string.Join(", ", installed)}");
-        }
-    }
-
-    // On while typing, and for the frame after Enter (so the Enter that confirms a
-    // name doesn't also reach the game).
-    internal static class KeyBlock
-    {
-        public static bool Typing;
-        public static int UntilFrame = -1;
-        public static bool Active => Typing || Time.frameCount <= UntilFrame;
-    }
-
-    // The game's shortcut keys all go through GRInputManager.Update.
-    [HarmonyPatch(typeof(GameRiver.GRInputManager), nameof(GameRiver.GRInputManager.Update))]
-    internal static class ShortcutKeyBlock
-    {
-        private static bool Prefix() => !KeyBlock.Active;
-    }
-
-    [HarmonyPatch(typeof(global::OrbitCameraController), nameof(global::OrbitCameraController.tryOrbitByKeyCode))]
-    internal static class OrbitKeyBlock
-    {
-        private static bool Prefix() => !KeyBlock.Active;
-    }
-
-    [HarmonyPatch(typeof(global::ZoomCameraController), nameof(global::ZoomCameraController.tryZone))]
-    internal static class ZoomKeyBlock
-    {
-        private static bool Prefix() => !KeyBlock.Active;
-    }
-
-    public class FormationBehaviour : MonoBehaviour
-    {
-        public FormationBehaviour(IntPtr ptr) : base(ptr) { }
-
-        static string FilePath => Path.Combine(Paths.BepInExRootPath, "rwc-formations.json");
+        static string FilePath => Path.Combine(Host.DataDir, "rwc-formations.json");
+        bool _started;
 
         LayoutFile _file;
         bool _shown = true;
@@ -122,15 +59,17 @@ namespace RwcFormations
         readonly List<List<(IntPtr ptr, int x, int y, bool rot)>> _undo = new List<List<(IntPtr, int, int, bool)>>();
         bool _wasReady;
 
+        // Once, on the first frame (Unity is ready by then under both loaders).
         void Start()
         {
+            _started = true;
             try { ClickBlock.Create(); }
-            catch (Exception e) { Plugin.L.LogError($"Click blocker failed (the hooks still block): {e}"); }
+            catch (Exception e) { Host.Error($"Click blocker failed (the hooks still block): {e}"); }
             try { _file = LayoutFile.Load(FilePath); }
             catch (Exception e)
             {
                 // Keep the unreadable file, start a fresh list beside it.
-                Plugin.L.LogError($"Reading {FilePath} failed: {e.Message}");
+                Host.Error($"Reading {FilePath} failed: {e.Message}");
                 try { File.Copy(FilePath, FilePath + ".unreadable-" + DateTime.Now.ToString("yyyyMMdd-HHmmss")); } catch { }
                 _file = new LayoutFile();
             }
@@ -141,8 +80,9 @@ namespace RwcFormations
         List<Layout> Listed() =>
             _have == null || _showAll ? _file.Layouts.ToList() : _file.Layouts.Where(l => Planner.Fits(l, _have)).ToList();
 
-        void Update()
+        public void Update()
         {
+            if (!_started) Start();
             if (Time.unscaledTime >= _nextStatus)
             {
                 _nextStatus = Time.unscaledTime + 0.5f;
@@ -160,12 +100,12 @@ namespace RwcFormations
                 if (_wasReady && !_ready && _undo.Count > 0) _undo.Clear();   // deployment over: nothing to revert to
                 _wasReady = _ready;
             }
-            ClickBlock.PanelShown = _shown && !_guiFailed && GameRiver.Client.MatchClient.Current != null;
+            ClickBlock.PanelShown = _shown && !_guiFailed && GRC.MatchClient.Current != null;
             try { ClickBlock.Sync(); } catch { }
 
             if (_editing != null)
             {
-                if (!_shown || GameRiver.Client.MatchClient.Current == null) { StopEditing(false); return; }
+                if (!_shown || GRC.MatchClient.Current == null) { StopEditing(false); return; }
                 foreach (char c in Input.inputString ?? "")
                 {
                     if (c == '\b') { if (_buf.Length > 0) _buf = _buf.Substring(0, _buf.Length - 1); }
@@ -225,9 +165,10 @@ namespace RwcFormations
         int _page;
         bool _guiFailed;
 
-        void OnGUI()
+        public void OnGUI()
         {
-            if (!_shown || _guiFailed || GameRiver.Client.MatchClient.Current == null) return;
+            if (!_started) return;
+            if (!_shown || _guiFailed || GRC.MatchClient.Current == null) return;
             try { DrawPanel(); }
             catch (Exception e)
             {
@@ -235,7 +176,7 @@ namespace RwcFormations
                 _guiFailed = true;
                 GUI.enabled = true;
                 if (_editing != null) StopEditing(false);
-                Plugin.L.LogError($"Panel drawing failed, panel off until the game restarts (hotkeys still work): {e}");
+                Host.Error($"Panel drawing failed, panel off until the game restarts (hotkeys still work): {e}");
             }
         }
 
@@ -251,7 +192,7 @@ namespace RwcFormations
             GUI.Box(new Rect(x0, y0, W, h), "");
             float x = x0 + Pad, y = y0 + Pad, iw = W - Pad * 2;
 
-            GUI.Label(new Rect(x, y, iw - 186, Row), $"RWC Formations {Plugin.Version}");
+            GUI.Label(new Rect(x, y, iw - 186, Row), $"RWC Formations {Host.Version}");
             GUI.enabled = _editing == null;
             if (GUI.Button(new Rect(x + iw - 180, y, 72, Row - 4), "Paste")) PasteLayout();
             GUI.enabled = true;
@@ -442,12 +383,12 @@ namespace RwcFormations
                 if (missing > 0) parts.Add($"{missing} saved spots with no unit for them");
                 if (plan.LeftAlone > 0) parts.Add($"{plan.LeftAlone} units not in the layout left alone");
                 _message = $"{what}: {string.Join(", ", parts)}.";
-                Plugin.L.LogInfo(_message);
+                Host.Info(_message);
             }
             catch (Exception e)
             {
                 _message = "Failed: " + e.Message;
-                Plugin.L.LogError($"{what} failed: {e}");
+                Host.Error($"{what} failed: {e}");
             }
         }
 
@@ -460,7 +401,7 @@ namespace RwcFormations
                 GUIUtility.systemCopyBuffer = code;
                 _message = $"Copied \"{l.Name}\" as a share code ({code.Length} characters). Paste it in Discord; friends add it with Paste.";
             }
-            catch (Exception e) { _message = "Copy failed: " + e.Message; Plugin.L.LogError($"Copy failed: {e}"); }
+            catch (Exception e) { _message = "Copy failed: " + e.Message; Host.Error($"Copy failed: {e}"); }
         }
 
         void PasteLayout()
@@ -478,7 +419,7 @@ namespace RwcFormations
             bool hidden = _have != null && !_showAll && !Planner.Fits(l, _have);
             if (!hidden) _page = Math.Max(0, Listed().IndexOf(l) / PerPage);
             _message = $"Added \"{l.Name}\" ({l.Slots.Count} units)" + (hidden ? ". It's hidden: you don't have its units now (Show all lists it)." : ".");
-            Plugin.L.LogInfo(_message);
+            Host.Info(_message);
         }
 
         // Put the units the last Place / Mirror moved back where they stood.
@@ -507,19 +448,19 @@ namespace RwcFormations
                 if (r.Failed > 0) parts.Add($"{r.Failed} refused by the game ({r.Detail})");
                 if (gone > 0) parts.Add($"{gone} no longer on the board");
                 _message = $"Reverted: {string.Join(", ", parts)}.";
-                Plugin.L.LogInfo(_message);
+                Host.Info(_message);
             }
             catch (Exception e)
             {
                 _message = "Revert failed: " + e.Message;
-                Plugin.L.LogError($"Revert failed: {e}");
+                Host.Error($"Revert failed: {e}");
             }
         }
 
         bool Persist()
         {
             try { _file.Save(FilePath); return true; }
-            catch (Exception e) { _message = "Saving the layouts file failed: " + e.Message; Plugin.L.LogError(_message); return false; }
+            catch (Exception e) { _message = "Saving the layouts file failed: " + e.Message; Host.Error(_message); return false; }
         }
 
         string NextName()

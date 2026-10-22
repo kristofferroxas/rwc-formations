@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    RWC Formations for MelonLoader 0.7 (IL2CPP), from the same sources as the
+    BepInEx build (../*.cs, MELON defined; GameTypes.cs maps the game's names).
+    Needs MelonLoader installed in the game once (it generates
+    MelonLoader/Il2CppAssemblies on the first start), or MelonDir pointing at a copy.
+    Build:  dotnet build -c Release   (in this folder)
+    Output: bin/Release/net6.0/RwcFormations.dll  (copy into Mods/, game closed)
+  -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>RwcFormations</AssemblyName>
+    <RootNamespace>RwcFormations</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);MELON</DefineConstants>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <MelonDir Condition="'$(MelonDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Mechabellum</MelonDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../*.cs" Exclude="../BepInExPlugin.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(MelonDir)\MelonLoader\net6\MelonLoader.dll" Private="false" />
+    <Reference Include="$(MelonDir)\MelonLoader\net6\0Harmony.dll" Private="false" />
+    <Reference Include="$(MelonDir)\MelonLoader\net6\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(MelonDir)\MelonLoader\net6\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(MelonDir)\MelonLoader\Il2CppAssemblies\*.dll" Private="false" />
+  </ItemGroup>
+</Project>

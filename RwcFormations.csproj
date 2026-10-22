@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    RWC Formations: a BepInEx 6 (IL2CPP) plugin that saves unit positioning and
-    places it back (as saved or mirrored). Not part of the website (never deployed).
+    RWC Formations for BepInEx 6 (IL2CPP): saves unit positioning and places it back
+    (as saved or mirrored). The MelonLoader build is melon/RwcFormations.Melon.csproj,
+    from the same sources (0.7.0). Not part of the website (never deployed).
     Builds against the game's own BepInEx install; nothing is copied out of it.
     Build:  dotnet build -c Release
     Output: bin/Release/net6.0/RwcFormations.dll  (copy into BepInEx/plugins, game closed)
@@ -19,6 +20,10 @@
     <!-- The offline test program is its own project. -->
     <Compile Remove="formation-test/**" />
     <None Remove="formation-test/**" />
+    <!-- The MelonLoader build is its own project (melon/), from the same sources. -->
+    <Compile Remove="melon/**" />
+    <None Remove="melon/**" />
+    <Compile Remove="MelonMod.cs" />
   </ItemGroup>
 
   <ItemGroup>

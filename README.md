@@ -96,11 +96,30 @@ in, update the version in HOW-TO-INSTALL.txt, zip DLL + txt + bat + ps1 as
 `gh release create vX.Y.Z friend-package/RWC-Formations-x.y.z.zip` with the zip's SHA-256
 in the notes. Built files (bin/, obj/, the zip, the DLL copy) stay out of git.
 
+## Code layout: one core, two loaders (0.7.0)
+
+- **Core, no loader code:** `Panel.cs` (the panel), `GameBoard.cs` (reading the board,
+  sending moves), `ClickBlock.cs`, `Hooks.cs` (key and click blocks), plus the game-free
+  `Layouts.cs`, `Preview.cs`, `Share.cs`, `UnitInfo.cs`.
+- **`Host.cs`:** the only place that knows the loader (logging, data folder, version).
+- **`GameTypes.cs`:** the game's type names per loader. BepInEx keeps the game's
+  namespaces; MelonLoader is EXPECTED to prefix them with `Il2Cpp`
+  (`Il2CppGameRiver`, `Il2Cpp` for the global namespace). Not checked yet: confirm on
+  the first MelonLoader build; only this file changes if it's different.
+- **Entry points:** `BepInExPlugin.cs` (built by `RwcFormations.csproj`) and
+  `MelonMod.cs` (built by `melon/RwcFormations.Melon.csproj`, with `MELON` defined).
+- **Data folder:** BepInEx keeps `BepInEx/rwc-formations.json` (as before); MelonLoader
+  uses `UserData/rwc-formations.json`. Same format, same share codes.
+- **The MelonLoader build needs MelonLoader's files** (`MelonLoader/net6/*.dll` and the
+  `MelonLoader/Il2CppAssemblies/` it generates on its first game start). Point
+  `MelonDir` at a game folder that has them: `dotnet build -c Release -p:MelonDir=...`.
+
 ## Build, test, install
 
 ```
 dotnet build -c Release                  (bin/Release/net6.0/RwcFormations.dll)
 cd formation-test && dotnet run -c Release   (offline checks of the planner, no game)
+cd melon && dotnet build -c Release            (MelonLoader build; needs MelonLoader's files)
 ```
 
 Install: with the game closed, copy `RwcFormations.dll` into `BepInEx/plugins/`.

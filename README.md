@@ -192,6 +192,9 @@ Still to check in a game (AI or custom, not ranked):
 4. Click a panel button while a unit is picked up for moving: does the click also land
    on the map? The panel is drawn with Unity's IMGUI, which doesn't block the game's own
    input.
+0.7.0 (2026-10-22): one core, two loaders. BepInEx build installed. MelonLoader 0.7.3 build:
+tested by Kris in an AI game (loads with all six hooks; Place, Mirrored, Revert and the
+preview work). Save and Paste weren't in that log: check them on the next MelonLoader run.
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

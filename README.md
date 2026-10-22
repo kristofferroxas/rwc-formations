@@ -86,6 +86,16 @@ changes. Layouts saved before 0.3.0 have no footprint of their own, so the previ
 these (turned when the placement is rotated). The preview geometry is in `Preview.cs`
 (game-free, checked by `formation-test/`).
 
+## Releasing to friends (private GitHub repo)
+
+`formation-plugin/` is its own git repo: https://github.com/kristofferroxas/rwc-formations
+(PRIVATE; friends are added as collaborators, Settings > Collaborators). For a new version:
+bump `Plugin.Version`, build, run `formation-test/`, rebuild `friend-package/` (copy the DLL
+in, update the version in HOW-TO-INSTALL.txt, zip DLL + txt + bat + ps1 as
+`RWC-Formations-x.y.z.zip`), commit and push, then
+`gh release create vX.Y.Z friend-package/RWC-Formations-x.y.z.zip` with the zip's SHA-256
+in the notes. Built files (bin/, obj/, the zip, the DLL copy) stay out of git.
+
 ## Build, test, install
 
 ```

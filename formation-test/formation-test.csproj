@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Offline checks for Layouts.cs (the plugin's matching, mirroring and layouts
+    file). No game references.  dotnet run -c Release
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- Built like the plugin (net6.0); runs on whatever newer runtime is installed. -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Layouts.cs" />
+    <Compile Include="../Preview.cs" />
+    <Compile Include="../Share.cs" />
+  </ItemGroup>
+</Project>

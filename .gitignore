@@ -1,0 +1,10 @@
+# Build output (the DLL ships in the release zip, not in the repo)
+bin/
+obj/
+formation-test/bin/
+formation-test/obj/
+__pycache__/
+
+# Built friend package: attach the zip to a GitHub release instead
+friend-package/*.zip
+friend-package/RwcFormations.dll

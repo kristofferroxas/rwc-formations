@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    RWC Formations: a BepInEx 6 (IL2CPP) plugin that saves unit positioning and
+    places it back (as saved or mirrored). Not part of the website (never deployed).
+    Builds against the game's own BepInEx install; nothing is copied out of it.
+    Build:  dotnet build -c Release
+    Output: bin/Release/net6.0/RwcFormations.dll  (copy into BepInEx/plugins, game closed)
+  -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>RwcFormations</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\Mechabellum</GameDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The offline test program is its own project. -->
+    <Compile Remove="formation-test/**" />
+    <None Remove="formation-test/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(GameDir)\BepInEx\core\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\core\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\core\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\core\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\GRCore.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\GRClient.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\GRUtility.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\GRFight.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\BinNetwork.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\Google.Protobuf.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\ConfigDataProtocol.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\Il2CppSystem.dll" Private="false" />
+    <Reference Include="$(GameDir)\BepInEx\interop\Il2CppSystem.Core.dll" Private="false" />
+  </ItemGroup>
+</Project>

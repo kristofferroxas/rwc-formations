@@ -161,7 +161,29 @@ Check(Share.TryDecode(Pack("{\"v\":1,\"n\":\"  \\u0007Bad\\nname that is far too
       && cleaned.Name.Length <= Planner.MaxName && !cleaned.Name.Any(char.IsControl), "names cleaned and capped");
 Check(Share.TryDecode(Pack("{\"v\":1,\"s\":[[1,0,0,0,5,0,0]]}"), out var noName, out _) && noName.Name == "Shared layout" && noName.Area == null, "no name / no area");
 
-// 12. Layouts file round trip.
+// 12. Version safety (0.8.0).
+var kb = Builds.Known[0];
+Check(Builds.Check(kb.Version, kb.AssemblySize) == Builds.Verdict.Known, "known build runs");
+Check(Builds.Check(kb.Version, -1) == Builds.Verdict.Known, "GameAssembly unreadable: decided on the version");
+Check(Builds.Check(kb.Version, kb.AssemblySize + 512) == Builds.Verdict.ChangedCode, "same version, new code: off");
+Check(Builds.Check("2.0.0.5.2340", kb.AssemblySize) == Builds.Verdict.UnknownVersion, "new version: off");
+Check(Builds.Check(null, kb.AssemblySize) == Builds.Verdict.Unreadable && Builds.Check(" ", 1) == Builds.Verdict.Unreadable, "no version: off");
+Check(Builds.Notice(Builds.Verdict.Known, kb.Version, "0.8.0") == null, "no notice on a known build");
+Check(Builds.Notice(Builds.Verdict.UnknownVersion, "2.0.0.5.2340", "0.8.0").Contains("2.0.0.5.2340"), "notice names the build");
+Check(Builds.VersionFromSettings(System.Text.Encoding.ASCII.GetBytes("\0\0GameRiver\0Mechabellum\0\x01 2.0.0.4.2331\0 2022.3.62f3")) == "2.0.0.4.2331", "version found in settings bytes (not the Unity version)");
+Check(Builds.VersionFromSettings(new byte[] { 1, 2, 3 }) == null, "no version in junk");
+// Real data, read-only: this PC's game install must count as a known build.
+const string RealGame = @"C:\Program Files (x86)\Steam\steamapps\common\Mechabellum";
+if (Directory.Exists(RealGame))
+{
+    var realVersion = Builds.VersionFromSettingsFile(RealGame);
+    var realSize = Builds.AssemblySize(RealGame);
+    Check(realVersion == kb.Version && realSize == kb.AssemblySize && Builds.Check(realVersion, realSize) == Builds.Verdict.Known,
+          $"this PC's game ({realVersion}, {realSize} bytes) is a known build");
+}
+Check(Builds.AssemblySize(Path.GetTempPath()) == -1, "no GameAssembly.dll: size -1");
+
+// 13. Layouts file round trip.
 var path = Path.Combine(Path.GetTempPath(), "rwc-formations-test.json");
 if (File.Exists(path)) File.Delete(path);
 var file = new LayoutFile();

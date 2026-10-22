@@ -15,5 +15,6 @@
     <Compile Include="../Layouts.cs" />
     <Compile Include="../Preview.cs" />
     <Compile Include="../Share.cs" />
+    <Compile Include="../Builds.cs" />
   </ItemGroup>
 </Project>

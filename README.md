@@ -86,6 +86,26 @@ changes. Layouts saved before 0.3.0 have no footprint of their own, so the previ
 these (turned when the placement is rotated). The preview geometry is in `Preview.cs`
 (game-free, checked by `formation-test/`).
 
+## Version safety (0.8.0)
+
+The mod hooks the game's own code, so a game patch can break it. At load, before any
+hook goes in, `Host.CheckBuild` compares the game build with `Builds.Known`
+(`Builds.cs`): the game's version string (Unity's `Application.version`, falling back to
+the one in `Mechabellum_Data/globalgamemanagers`) and the size of `GameAssembly.dll`
+(a hotfix that keeps the version string still changes that file).
+
+- **Known build:** runs normally. The log says e.g. `Game build 2.0.0.4.2331,
+  GameAssembly.dll 71137792 bytes: Known.`
+- **Any other build:** no hooks, no board reading, no moves. The panel shows only a
+  one-line notice (F6 or Hide hides it) and the log says why and how to override.
+- **Override for testing:** a file named `rwc-formations-allow-any-build` in the mod's
+  data folder (`BepInEx/` or `UserData/`) runs it anyway.
+
+**After a game patch:** create the override file, test one AI game (Save, Place,
+Mirrored, Revert, preview, Copy/Paste), read the new version and size from the log, add
+them to `Builds.Known`, update the real-data check in `formation-test/`, release, and
+delete the override file.
+
 ## Releasing to friends (private GitHub repo)
 
 `formation-plugin/` is its own git repo: https://github.com/kristofferroxas/rwc-formations
@@ -195,6 +215,9 @@ Still to check in a game (AI or custom, not ranked):
 0.7.0 (2026-10-22): one core, two loaders. BepInEx build installed. MelonLoader 0.7.3 build:
 tested by Kris in an AI game (loads with all six hooks; Place, Mirrored, Revert and the
 preview work). Save and Paste weren't in that log: check them on the next MelonLoader run.
+0.8.0 (2026-10-22): version safety (`Builds.cs`). 75/75 offline checks, including this PC's
+game counting as a known build. Installed for both loaders. **Off mode not seen in a game yet**
+(it only shows on an unknown build).
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

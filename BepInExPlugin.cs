@@ -16,12 +16,14 @@ namespace RwcFormations
     {
         public override void Load()
         {
-            Host.Init("BepInEx", Paths.BepInExRootPath, m => Log.LogInfo(m), m => Log.LogError(m));
+            Host.Init("BepInEx", Paths.BepInExRootPath, Paths.GameRootPath, m => Log.LogInfo(m), m => Log.LogError(m));
+            bool run = Host.CheckBuild();
             ClassInjector.RegisterTypeInIl2Cpp<FormationBehaviour>();
             var go = new GameObject("RwcFormations");
             UnityEngine.Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
             go.AddComponent<FormationBehaviour>();
+            if (!run) { Host.Info($"RWC Formations {Host.Version} (BepInEx) loaded, OFF on this game build."); return; }
             var installed = Hooks.Install(new Harmony("com.rhinowaspcult.formations"));
             Host.Info($"RWC Formations {Host.Version} (BepInEx) loaded. F6 = panel; Ctrl+Alt+1..9 = place layout (with Shift = mirrored). Hooks: {string.Join(", ", installed)}");
         }

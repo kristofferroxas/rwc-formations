@@ -18,9 +18,10 @@ namespace RwcFormations
 
         public override void OnInitializeMelon()
         {
-            Host.Init("MelonLoader", MelonEnvironment.UserDataDirectory, m => LoggerInstance.Msg(m), m => LoggerInstance.Error(m));
-            var installed = Hooks.Install(HarmonyInstance);
+            Host.Init("MelonLoader", MelonEnvironment.UserDataDirectory, MelonEnvironment.GameRootDirectory, m => LoggerInstance.Msg(m), m => LoggerInstance.Error(m));
             _panel = new Panel();
+            if (!Host.CheckBuild()) { Host.Info($"RWC Formations {Host.Version} (MelonLoader) loaded, OFF on this game build."); return; }
+            var installed = Hooks.Install(HarmonyInstance);
             Host.Info($"RWC Formations {Host.Version} (MelonLoader) loaded. F6 = panel; Ctrl+Alt+1..9 = place layout (with Shift = mirrored). Hooks: {string.Join(", ", installed)}");
         }
 

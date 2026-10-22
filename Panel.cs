@@ -63,6 +63,7 @@ namespace RwcFormations
         void Start()
         {
             _started = true;
+            if (Host.OffNotice != null) return;   // unchecked game build: nothing touches the game
             try { ClickBlock.Create(); }
             catch (Exception e) { Host.Error($"Click blocker failed (the hooks still block): {e}"); }
             try { _file = LayoutFile.Load(FilePath); }
@@ -83,6 +84,7 @@ namespace RwcFormations
         public void Update()
         {
             if (!_started) Start();
+            if (Host.OffNotice != null) { if (Input.GetKeyDown(KeyCode.F6)) _shown = !_shown; return; }
             if (Time.unscaledTime >= _nextStatus)
             {
                 _nextStatus = Time.unscaledTime + 0.5f;
@@ -169,6 +171,7 @@ namespace RwcFormations
         {
             if (!_started) return;
             if (!_shown || _guiFailed || GRC.MatchClient.Current == null) return;
+            if (Host.OffNotice != null) { DrawOff(); return; }
             try { DrawPanel(); }
             catch (Exception e)
             {
@@ -178,6 +181,21 @@ namespace RwcFormations
                 if (_editing != null) StopEditing(false);
                 Host.Error($"Panel drawing failed, panel off until the game restarts (hotkeys still work): {e}");
             }
+        }
+
+        // Off mode (unchecked game build): just the notice, in the panel's corner.
+        void DrawOff()
+        {
+            try
+            {
+                const float w = 460, h = 64;
+                float x0 = _corner == 0 || _corner == 3 ? 10 : Screen.width - w - 10;
+                float y0 = _corner < 2 ? 90 : Screen.height - h - 90;
+                GUI.Box(new Rect(x0, y0, w, h), "");
+                GUI.Label(new Rect(x0 + 8, y0 + 6, w - 74, h - 12), Host.OffNotice + " (F6 hides this.)");
+                if (GUI.Button(new Rect(x0 + w - 60, y0 + 8, 52, 24), "Hide")) _shown = false;
+            }
+            catch (Exception e) { _guiFailed = true; Host.Error($"Notice drawing failed: {e.Message}"); }
         }
 
         void DrawPanel()

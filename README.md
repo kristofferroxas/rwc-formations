@@ -103,9 +103,13 @@ in the notes. Built files (bin/, obj/, the zip, the DLL copy) stay out of git.
   `Layouts.cs`, `Preview.cs`, `Share.cs`, `UnitInfo.cs`.
 - **`Host.cs`:** the only place that knows the loader (logging, data folder, version).
 - **`GameTypes.cs`:** the game's type names per loader. BepInEx keeps the game's
-  namespaces; MelonLoader is EXPECTED to prefix them with `Il2Cpp`
-  (`Il2CppGameRiver`, `Il2Cpp` for the global namespace). Not checked yet: confirm on
-  the first MelonLoader build; only this file changes if it's different.
+  namespaces; MelonLoader 0.7.3 prefixes them with `Il2Cpp` (`Il2CppGameRiver`,
+  `Il2CppGameRiver.Client`, `Il2Cpp` for the global namespace; checked on its generated
+  files, 2026-10-22). Its generated files are named `Il2CppGRCore.dll` etc.
+- **Switching loaders for testing:** `loader-switch/use-melonloader.ps1` and
+  `use-bepinex.ps1` (game closed) only rename `winhttp.dll` (BepInEx) and `version.dll`
+  (MelonLoader) to `.off`; nothing is deleted. The first switch unpacks MelonLoader from
+  `-MelonZip`, checked against its SHA-256.
 - **Entry points:** `BepInExPlugin.cs` (built by `RwcFormations.csproj`) and
   `MelonMod.cs` (built by `melon/RwcFormations.Melon.csproj`, with `MELON` defined).
 - **Data folder:** BepInEx keeps `BepInEx/rwc-formations.json` (as before); MelonLoader

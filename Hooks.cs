@@ -20,7 +20,8 @@ namespace RwcFormations
         };
 
         // The names of the hooks that went in.
-        public static List<string> Install(Harmony harmony)
+        // (HarmonyLib.Harmony in full: MelonLoader's references also have a "Harmony" namespace.)
+        public static List<string> Install(HarmonyLib.Harmony harmony)
         {
             var installed = new List<string>();
             foreach (var t in All)

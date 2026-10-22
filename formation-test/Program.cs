@@ -183,7 +183,34 @@ if (Directory.Exists(RealGame))
 }
 Check(Builds.AssemblySize(Path.GetTempPath()) == -1, "no GameAssembly.dll: size -1");
 
-// 13. Layouts file round trip.
+// 13. Panel text in English and Chinese (0.9.0).
+Check(Tx.ChineseFor(null, "zh-CN") && Tx.ChineseFor("", "zh-Hans") && Tx.ChineseFor(null, "ZH-tw"), "Chinese game language = Chinese panel");
+Check(!Tx.ChineseFor(null, "en") && !Tx.ChineseFor(null, null) && !Tx.ChineseFor(null, "ja-JP"), "other languages = English panel");
+Check(Tx.ChineseFor("zh\n", "en") && !Tx.ChineseFor(" EN ", "zh-CN"), "the override file wins");
+// Every reason the board and share codes can give has a Chinese version (reads the sources).
+var keys = new HashSet<string>(Tx.ReasonKeys);
+string Src(string f) => File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", f));
+var reasonLiterals = System.Text.RegularExpressions.Regex.Matches(Src("GameBoard.cs") + Src("Share.cs"), @"(?:why|error) = ""([^""]+)""")
+    .Select(m => m.Groups[1].Value).Distinct().ToList();
+Check(reasonLiterals.Count >= 12, $"found the reasons in the sources ({reasonLiterals.Count})");
+foreach (var r in reasonLiterals) Check(keys.Contains(r), $"Chinese for reason \"{r}\"");
+// Every panel string differs in Chinese (nothing left untranslated).
+var props = typeof(Tx).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+    .Where(pp => pp.PropertyType == typeof(string) && pp.Name != "Zh").ToList();
+Tx.Zh = false; var en = props.ToDictionary(pp => pp.Name, pp => (string)pp.GetValue(null));
+Tx.Zh = true; var zh = props.ToDictionary(pp => pp.Name, pp => (string)pp.GetValue(null));
+foreach (var pp in props) Check(en[pp.Name] != zh[pp.Name], $"Tx.{pp.Name} is translated");
+Check(Tx.Saved("Rush", 7).Contains("“Rush”") && Tx.Saved("Rush", 7).Contains("7"), "Chinese message keeps the layout name and numbers");
+Check(Tx.Result(Tx.Placing("A", true), new[] { Tx.Moved(3), Tx.Missing(1) }) == "“A”（镜像）：移动 3 个，1 个位置没有对应的单位。", "Chinese result sentence");
+Check(Tx.Reason("error: boom") == "error: boom", "unknown reasons pass through");
+Check(UnitInfo.Name(10) == "爬虫" && UnitInfo.Name(32) == "百夫长" && UnitInfo.Name(99999) == "单位 99999", "Chinese unit names");
+Check(Tx.Notice(Builds.Verdict.UnknownVersion, "2.0.0.5.2340", "0.9.0").Contains("2.0.0.5.2340"), "Chinese off notice names the build");
+Tx.Zh = false;
+Check(UnitInfo.Name(10) == "Crawler" && UnitInfo.Name(99999) == "Unit 99999", "English unit names");
+Check(Tx.Result(Tx.Placing("A", true), new[] { Tx.Moved(3), Tx.Missing(1) }) == "\"A\" mirrored: 3 moved, 1 saved spots with no unit for them.", "English result sentence unchanged");
+Check(Tx.Notice(Builds.Verdict.ChangedCode, "x", "0.9.0") == Builds.Notice(Builds.Verdict.ChangedCode, "x", "0.9.0"), "English notice = Builds.Notice");
+
+// 14. Layouts file round trip.
 var path = Path.Combine(Path.GetTempPath(), "rwc-formations-test.json");
 if (File.Exists(path)) File.Delete(path);
 var file = new LayoutFile();

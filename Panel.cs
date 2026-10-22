@@ -50,7 +50,7 @@ namespace RwcFormations
             return v;
         }
         bool _showAll;
-        float _nextStatus;
+        float _nextStatus, _nextLanguage;
         int _confirmDelete = -1;
         Layout _editing;                 // the layout being named, or null
         string _buf = "";
@@ -63,6 +63,13 @@ namespace RwcFormations
         void Start()
         {
             _started = true;
+            try
+            {
+                var lf = Path.Combine(Host.DataDir, LanguageFile);
+                _languageOverride = File.Exists(lf) ? File.ReadAllText(lf) : null;
+            }
+            catch { _languageOverride = null; }
+            RefreshLanguage();
             if (Host.OffNotice != null) return;   // unchecked game build: nothing touches the game
             try { ClickBlock.Create(); }
             catch (Exception e) { Host.Error($"Click blocker failed (the hooks still block): {e}"); }
@@ -76,6 +83,19 @@ namespace RwcFormations
             }
         }
 
+        // Panel language (0.9.0, Text.cs): a file named rwc-formations-language with
+        // "en" or "zh", else the game's own language (a code starting "zh" = Chinese).
+        const string LanguageFile = "rwc-formations-language";
+        string _languageOverride;
+
+        void RefreshLanguage()
+        {
+            string game = null;
+            try { game = GRC.GRLocalizationManager.Instance?.GetCurrentLanguage()?.Name; } catch { }
+            bool zh = Tx.ChineseFor(_languageOverride, game);
+            if (zh != Tx.Zh) { Tx.Zh = zh; Host.Info($"Panel language: {(zh ? "Chinese" : "English")} (game language {game ?? "?"}{(_languageOverride != null ? ", override file" : "")})."); }
+        }
+
         // The layouts the panel lists: those that fit your board, or all of them
         // (Show all, or when there's no board to compare with).
         List<Layout> Listed() =>
@@ -84,6 +104,7 @@ namespace RwcFormations
         public void Update()
         {
             if (!_started) Start();
+            if (Time.unscaledTime >= _nextLanguage) { _nextLanguage = Time.unscaledTime + 2f; RefreshLanguage(); }
             if (Host.OffNotice != null) { if (Input.GetKeyDown(KeyCode.F6)) _shown = !_shown; return; }
             if (Time.unscaledTime >= _nextStatus)
             {
@@ -127,7 +148,7 @@ namespace RwcFormations
                     {
                         var listed = Listed();
                         if (i < listed.Count) Place(listed[i], shift);
-                        else _message = $"No layout {i + 1} in the list.";
+                        else _message = Tx.NoLayoutNumber(i + 1);
                     }
         }
 
@@ -148,7 +169,7 @@ namespace RwcFormations
                 {
                     var old = _editing.Name;
                     _editing.Name = name;
-                    if (Persist()) _message = $"Named \"{name}\" (was \"{old}\").";
+                    if (Persist()) _message = Tx.Named(name, old);
                 }
             }
             _editing = null;
@@ -193,8 +214,8 @@ namespace RwcFormations
                 float x0 = _corner == 0 || _corner == 3 ? 10 : Screen.width - w - 10;
                 float y0 = _corner < 2 ? 90 : Screen.height - h - 90;
                 GUI.Box(new Rect(x0, y0, w, h), "");
-                GUI.Label(new Rect(x0 + 8, y0 + 6, w - 74, h - 12), Host.OffNotice + " (F6 hides this.)");
-                if (GUI.Button(new Rect(x0 + w - 60, y0 + 8, 52, 24), "Hide")) _shown = false;
+                GUI.Label(new Rect(x0 + 8, y0 + 6, w - 74, h - 12), Tx.Notice(Host.OffVerdict, Host.GameVersion, Host.Version) + Tx.OffNoticeHint);
+                if (GUI.Button(new Rect(x0 + w - 60, y0 + 8, 52, 24), Tx.Hide)) _shown = false;
             }
             catch (Exception e) { _guiFailed = true; Host.Error($"Notice drawing failed: {e.Message}"); }
         }
@@ -213,19 +234,19 @@ namespace RwcFormations
 
             GUI.Label(new Rect(x, y, iw - 186, Row), $"RWC Formations {Host.Version}");
             GUI.enabled = _editing == null;
-            if (GUI.Button(new Rect(x + iw - 180, y, 72, Row - 4), "Paste")) PasteLayout();
+            if (GUI.Button(new Rect(x + iw - 180, y, 72, Row - 4), Tx.Paste)) PasteLayout();
             GUI.enabled = true;
-            if (GUI.Button(new Rect(x + iw - 104, y, 50, Row - 4), "Move")) _corner = (_corner + 1) % 4;
-            if (GUI.Button(new Rect(x + iw - 50, y, 50, Row - 4), "Hide")) { if (_editing != null) StopEditing(false); _shown = false; }
+            if (GUI.Button(new Rect(x + iw - 104, y, 50, Row - 4), Tx.MovePanel)) _corner = (_corner + 1) % 4;
+            if (GUI.Button(new Rect(x + iw - 50, y, 50, Row - 4), Tx.Hide)) { if (_editing != null) StopEditing(false); _shown = false; }
             y += Row;
-            GUI.Label(new Rect(x, y, iw, Row), FontCheck.On ? FontCheck.Sample : _ready ? "Deploying: buttons on. F6 hides." : "Off: " + _status);
+            GUI.Label(new Rect(x, y, iw, Row), FontCheck.On ? FontCheck.Sample : _ready ? Tx.Deploying : Tx.OffBecause(_status));
             y += Row;
 
             GUI.enabled = _ready && _editing == null;
-            if (GUI.Button(new Rect(x, y, 112, Row - 4), "Save current")) SaveCurrent();
-            if (GUI.Button(new Rect(x + 116, y, 132, Row - 4), "Mirror my units")) MirrorCurrent();
+            if (GUI.Button(new Rect(x, y, 112, Row - 4), Tx.SaveCurrent)) SaveCurrent();
+            if (GUI.Button(new Rect(x + 116, y, 132, Row - 4), Tx.MirrorMine)) MirrorCurrent();
             GUI.enabled = _ready && _editing == null && _undo.Count > 0;
-            if (GUI.Button(new Rect(x + 252, y, iw - 252, Row - 4), _undo.Count > 1 ? $"Revert ({_undo.Count})" : "Revert")) Revert();
+            if (GUI.Button(new Rect(x + 252, y, iw - 252, Row - 4), Tx.Revert(_undo.Count))) Revert();
             GUI.enabled = true;
             y += Row;
             GUI.Label(new Rect(x, y, iw, Row * 2), _message ?? "");
@@ -234,30 +255,30 @@ namespace RwcFormations
             if (_editing != null)
             {
                 // The name box: what's typed so far, with a blinking cursor.
-                GUI.Label(new Rect(x, y, 48, Row), "Name:");
+                GUI.Label(new Rect(x, y, 48, Row), Tx.NameLabel);
                 bool blink = ((int)(Time.unscaledTime * 2)) % 2 == 0;
-                string shown = _buf.Length == 0 ? $"type a name ({_editing.Name})" : _buf + (blink ? "|" : " ");
+                string shown = _buf.Length == 0 ? Tx.TypeAName(_editing.Name) : _buf + (blink ? "|" : " ");
                 GUI.Box(new Rect(x + 50, y, iw - 50 - 128, Row - 4), shown);
-                if (GUI.Button(new Rect(x + iw - 124, y, 50, Row - 4), "OK")) StopEditing(true);
-                if (GUI.Button(new Rect(x + iw - 70, y, 70, Row - 4), "Cancel")) StopEditing(false);
+                if (GUI.Button(new Rect(x + iw - 124, y, 50, Row - 4), Tx.Ok)) StopEditing(true);
+                if (GUI.Button(new Rect(x + iw - 70, y, 70, Row - 4), Tx.Cancel)) StopEditing(false);
             }
             else if (_have != null)
             {
                 int hidden = _file.Layouts.Count - _file.Layouts.Count(l => Planner.Fits(l, _have));
                 GUI.Label(new Rect(x, y, iw - 104, Row),
-                    _showAll ? $"All {_file.Layouts.Count} layouts" : $"{listed.Count} fit your board" + (hidden > 0 ? $", {hidden} hidden" : ""));
-                if ((_showAll || hidden > 0) && GUI.Button(new Rect(x + iw - 100, y, 100, Row - 4), _showAll ? "Fitting only" : "Show all"))
+                    _showAll ? Tx.AllLayouts(_file.Layouts.Count) : Tx.FitYourBoard(listed.Count, hidden));
+                if ((_showAll || hidden > 0) && GUI.Button(new Rect(x + iw - 100, y, 100, Row - 4), _showAll ? Tx.FittingOnly : Tx.ShowAll))
                 {
                     _showAll = !_showAll;
                     _page = 0;
                     _confirmDelete = -1;
                 }
             }
-            else GUI.Label(new Rect(x, y, iw, Row), $"All {_file.Layouts.Count} layouts");
+            else GUI.Label(new Rect(x, y, iw, Row), Tx.AllLayouts(_file.Layouts.Count));
             y += Row;
 
             if (listed.Count == 0)
-                GUI.Label(new Rect(x, y, iw, Row * 2), _file.Layouts.Count == 0 ? "No layouts saved yet." : "None of your layouts fit the units on your board.");
+                GUI.Label(new Rect(x, y, iw, Row * 2), _file.Layouts.Count == 0 ? Tx.NoLayouts : Tx.NoneFit);
             var mp = Input.mousePosition;
             var mouse = new Vector2(mp.x, Screen.height - mp.y);
             Layout hover = null;
@@ -273,16 +294,16 @@ namespace RwcFormations
                     hover = l;
                     hoverMirror = new Rect(x + iw - 226, ry, 70, Row - 4).Contains(mouse);
                 }
-                string count = _have == null ? $"{l.Slots.Count}" : $"{Planner.Fillable(l, _have)} of {l.Slots.Count}";
+                string count = _have == null ? $"{l.Slots.Count}" : Tx.Fillable(Planner.Fillable(l, _have), l.Slots.Count);
                 if (_have != null && Planner.Fillable(l, _have) == l.Slots.Count) count = $"{l.Slots.Count}";
                 GUI.Label(new Rect(x, ry, iw - 286, Row), $"{i + 1}. {l.Name} ({count})");
                 GUI.enabled = _ready && _editing == null;
-                if (GUI.Button(new Rect(x + iw - 282, ry, 52, Row - 4), "Place")) Place(l, false);
-                if (GUI.Button(new Rect(x + iw - 226, ry, 70, Row - 4), "Mirrored")) Place(l, true);
+                if (GUI.Button(new Rect(x + iw - 282, ry, 52, Row - 4), Tx.Place)) Place(l, false);
+                if (GUI.Button(new Rect(x + iw - 226, ry, 70, Row - 4), Tx.Mirrored)) Place(l, true);
                 GUI.enabled = _editing == null;
-                if (GUI.Button(new Rect(x + iw - 152, ry, 54, Row - 4), "Name")) StartEditing(l, l.Name);
-                if (GUI.Button(new Rect(x + iw - 94, ry, 50, Row - 4), "Copy")) CopyLayout(l);
-                if (GUI.Button(new Rect(x + iw - 40, ry, 40, Row - 4), _confirmDelete == _file.Layouts.IndexOf(l) ? "sure?" : "x"))
+                if (GUI.Button(new Rect(x + iw - 152, ry, 54, Row - 4), Tx.NameButton)) StartEditing(l, l.Name);
+                if (GUI.Button(new Rect(x + iw - 94, ry, 50, Row - 4), Tx.Copy)) CopyLayout(l);
+                if (GUI.Button(new Rect(x + iw - 40, ry, 40, Row - 4), _confirmDelete == _file.Layouts.IndexOf(l) ? Tx.Sure : "x"))
                 {
                     int fi = _file.Layouts.IndexOf(l);
                     if (_confirmDelete == fi) { _file.Layouts.RemoveAt(fi); _confirmDelete = -1; Persist(); GUI.enabled = true; return; }
@@ -294,7 +315,7 @@ namespace RwcFormations
             {
                 float py = y + Row * PerPage;
                 if (GUI.Button(new Rect(x, py, 40, Row - 4), "<") && _page > 0) _page--;
-                GUI.Label(new Rect(x + 50, py, 120, Row), $"page {_page + 1} of {pages}");
+                GUI.Label(new Rect(x + 50, py, 120, Row), Tx.Page(_page + 1, pages));
                 if (GUI.Button(new Rect(x + 170, py, 40, Row - 4), ">") && _page < pages - 1) _page++;
             }
             if (hover != null && _editing == null) DrawPreview(hover, hoverMirror, x0, y0);
@@ -321,7 +342,7 @@ namespace RwcFormations
             bx = Math.Max(0, Math.Min(bx, Screen.width - bw));
             GUI.Box(new Rect(bx, panelY, bw, bh), "");
             float fx = bx + Pad, fy = panelY + Pad;
-            GUI.Label(new Rect(fx, fy, PreviewW, Row), $"{l.Name}{(mirror ? " (mirrored)" : "")}: front is at the top");
+            GUI.Label(new Rect(fx, fy, PreviewW, Row), Tx.PreviewTitle(l.Name, mirror));
             fy += Row;
 
             var white = Texture2D.whiteTexture;
@@ -357,8 +378,8 @@ namespace RwcFormations
         void SaveCurrent()
         {
             var b = GameBoard.Read(out var why);
-            if (b == null) { _message = "Can't save: " + why; return; }
-            if (b.Units.Count == 0) { _message = "No units on the board to save."; return; }
+            if (b == null) { _message = Tx.CantSave(why); return; }
+            if (b.Units.Count == 0) { _message = Tx.NothingToSave; return; }
             var name = NextName();
             var layout = GameBoard.Capture(b, name);
             _file.Layouts.Add(layout);
@@ -368,7 +389,7 @@ namespace RwcFormations
             GameBoard.LogBoard(b);
             if (Persist())
             {
-                _message = $"Saved \"{name}\" ({layout.Slots.Count} units). Type a name and press Enter, or OK to keep it.";
+                _message = Tx.Saved(name, layout.Slots.Count);
                 StartEditing(layout, "");
             }
         }
@@ -376,15 +397,15 @@ namespace RwcFormations
         void MirrorCurrent()
         {
             var b = GameBoard.Read(out var why);
-            if (b == null) { _message = "Can't mirror: " + why; return; }
-            Run(b, GameBoard.Capture(b, "current"), true, "Mirrored your units");
+            if (b == null) { _message = Tx.CantMirror(why); return; }
+            Run(b, GameBoard.Capture(b, "current"), true, Tx.MirroredYours);
         }
 
         void Place(Layout l, bool mirror)
         {
             var b = GameBoard.Read(out var why);
-            if (b == null) { _message = "Can't place: " + why; return; }
-            Run(b, GameBoard.InView(b, l), mirror, $"\"{l.Name}\"{(mirror ? " mirrored" : "")}");
+            if (b == null) { _message = Tx.CantPlace(why); return; }
+            Run(b, GameBoard.InView(b, l), mirror, Tx.Placing(l.Name, mirror));
         }
 
         void Run(Board b, Layout l, bool mirror, string what)
@@ -395,18 +416,18 @@ namespace RwcFormations
                 var before = plan.Moves.ToDictionary(m => m.Key, m => (b.Elements[m.Key].Pointer, b.Units[m.Key].X, b.Units[m.Key].Y, b.Units[m.Key].Rot));
                 var r = GameBoard.Apply(b, plan);
                 if (r.Done.Count > 0) _undo.Add(r.Done.Select(m => before[m.Key]).ToList());
-                var parts = new List<string> { $"{r.Moved} moved" };
-                if (plan.AlreadyThere > 0) parts.Add($"{plan.AlreadyThere} already in place");
-                if (r.Failed > 0) parts.Add($"{r.Failed} refused by the game ({r.Detail})");
+                var parts = new List<string> { Tx.Moved(r.Moved) };
+                if (plan.AlreadyThere > 0) parts.Add(Tx.AlreadyThere(plan.AlreadyThere));
+                if (r.Failed > 0) parts.Add(Tx.Refused(r.Failed, r.Detail));
                 int missing = plan.MissingUnits.Values.Sum();
-                if (missing > 0) parts.Add($"{missing} saved spots with no unit for them");
-                if (plan.LeftAlone > 0) parts.Add($"{plan.LeftAlone} units not in the layout left alone");
-                _message = $"{what}: {string.Join(", ", parts)}.";
+                if (missing > 0) parts.Add(Tx.Missing(missing));
+                if (plan.LeftAlone > 0) parts.Add(Tx.LeftAlone(plan.LeftAlone));
+                _message = Tx.Result(what, parts);
                 Host.Info(_message);
             }
             catch (Exception e)
             {
-                _message = "Failed: " + e.Message;
+                _message = Tx.Failed(e.Message);
                 Host.Error($"{what} failed: {e}");
             }
         }
@@ -418,26 +439,26 @@ namespace RwcFormations
             {
                 var code = Share.Encode(l);
                 GUIUtility.systemCopyBuffer = code;
-                _message = $"Copied \"{l.Name}\" as a share code ({code.Length} characters). Paste it in Discord; friends add it with Paste.";
+                _message = Tx.Copied(l.Name, code.Length);
             }
-            catch (Exception e) { _message = "Copy failed: " + e.Message; Host.Error($"Copy failed: {e}"); }
+            catch (Exception e) { _message = Tx.CopyFailed(e.Message); Host.Error($"Copy failed: {e}"); }
         }
 
         void PasteLayout()
         {
             string text;
             try { text = GUIUtility.systemCopyBuffer; }
-            catch (Exception e) { _message = "Couldn't read the clipboard: " + e.Message; return; }
-            if (!Share.TryDecode(text, out var l, out var error)) { _message = "Paste: " + error + "."; return; }
+            catch (Exception e) { _message = Tx.ClipboardUnreadable(e.Message); return; }
+            if (!Share.TryDecode(text, out var l, out var error)) { _message = Tx.PasteFailed(error); return; }
             var same = _file.Layouts.FirstOrDefault(x => Share.SameSpots(x, l));
-            if (same != null) { _message = $"You already have this layout as \"{same.Name}\"."; return; }
+            if (same != null) { _message = Tx.AlreadyHave(same.Name); return; }
             var name = l.Name;
             for (int n = 2; _file.Layouts.Any(x => x.Name == l.Name); n++) l.Name = Planner.CleanName($"{name} ({n})");
             _file.Layouts.Add(l);
             if (!Persist()) return;
             bool hidden = _have != null && !_showAll && !Planner.Fits(l, _have);
             if (!hidden) _page = Math.Max(0, Listed().IndexOf(l) / PerPage);
-            _message = $"Added \"{l.Name}\" ({l.Slots.Count} units)" + (hidden ? ". It's hidden: you don't have its units now (Show all lists it)." : ".");
+            _message = Tx.Added(l.Name, l.Slots.Count, hidden);
             Host.Info(_message);
         }
 
@@ -446,7 +467,7 @@ namespace RwcFormations
         {
             if (_undo.Count == 0) return;
             var b = GameBoard.Read(out var why);
-            if (b == null) { _message = "Can't revert: " + why; return; }
+            if (b == null) { _message = Tx.CantRevert(why); return; }
             var snap = _undo[_undo.Count - 1];
             var plan = new Plan();
             int gone = 0;
@@ -462,16 +483,16 @@ namespace RwcFormations
             {
                 var r = GameBoard.Apply(b, plan);
                 _undo.RemoveAt(_undo.Count - 1);
-                var parts = new List<string> { $"{r.Moved} moved back" };
-                if (plan.AlreadyThere > 0) parts.Add($"{plan.AlreadyThere} already back");
-                if (r.Failed > 0) parts.Add($"{r.Failed} refused by the game ({r.Detail})");
-                if (gone > 0) parts.Add($"{gone} no longer on the board");
-                _message = $"Reverted: {string.Join(", ", parts)}.";
+                var parts = new List<string> { Tx.MovedBack(r.Moved) };
+                if (plan.AlreadyThere > 0) parts.Add(Tx.AlreadyBack(plan.AlreadyThere));
+                if (r.Failed > 0) parts.Add(Tx.Refused(r.Failed, r.Detail));
+                if (gone > 0) parts.Add(Tx.Gone(gone));
+                _message = Tx.Reverted(parts);
                 Host.Info(_message);
             }
             catch (Exception e)
             {
-                _message = "Revert failed: " + e.Message;
+                _message = Tx.RevertFailed(e.Message);
                 Host.Error($"Revert failed: {e}");
             }
         }
@@ -479,7 +500,7 @@ namespace RwcFormations
         bool Persist()
         {
             try { _file.Save(FilePath); return true; }
-            catch (Exception e) { _message = "Saving the layouts file failed: " + e.Message; Host.Error(_message); return false; }
+            catch (Exception e) { _message = Tx.SaveFileFailed(e.Message); Host.Error(_message); return false; }
         }
 
         string NextName()

@@ -86,6 +86,18 @@ changes. Layouts saved before 0.3.0 have no footprint of their own, so the previ
 these (turned when the placement is rotated). The preview geometry is in `Preview.cs`
 (game-free, checked by `formation-test/`).
 
+## Languages (0.9.0)
+
+The panel is in English or Simplified Chinese (`Text.cs`, every string in both). It
+follows the game's own language (a code starting `zh` = Chinese, read from the game's
+localization manager); a file named `rwc-formations-language` in the data folder with
+`en` or `zh` overrides it. Unit names in the preview come from the game's own data
+(`name_zh` in the dump's `units.json`, all 101 units; `make_unit_info.py`). Layout names
+stay as typed; log lines stay English for bug reports. The panel's built-in font draws
+Chinese (font check, 0.8.1: `FontCheck.cs`, on only with a `rwc-formations-fonttest`
+file). **The Chinese is a first draft: have a native speaker review `Text.cs` before
+release.**
+
 ## Version safety (0.8.0)
 
 The mod hooks the game's own code, so a game patch can break it. At load, before any
@@ -218,6 +230,8 @@ preview work). Save and Paste weren't in that log: check them on the next MelonL
 0.8.0 (2026-10-22): version safety (`Builds.cs`). 75/75 offline checks, including this PC's
 game counting as a known build. Installed for both loaders. **Off mode not seen in a game yet**
 (it only shows on an unknown build).
+0.8.1: font check (Kris: Chinese draws). 0.9.0 (2026-10-22): English + Chinese panel, Chinese unit
+names. 126/126 offline checks. **Chinese panel not seen in a game yet.**
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

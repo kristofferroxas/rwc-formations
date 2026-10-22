@@ -16,5 +16,7 @@
     <Compile Include="../Preview.cs" />
     <Compile Include="../Share.cs" />
     <Compile Include="../Builds.cs" />
+    <Compile Include="../Text.cs" />
+    <Compile Include="../UnitInfo.cs" />
   </ItemGroup>
 </Project>

@@ -9,13 +9,15 @@ namespace RwcFormations
 {
     internal static class Host
     {
-        public const string Version = "0.8.1";
+        public const string Version = "0.9.0";
         public static string Loader = "";      // "BepInEx" or "MelonLoader"
         public static string DataDir = ".";    // where rwc-formations.json lives
         public static string GameDir = ".";    // the game folder (GameAssembly.dll)
         // Set by CheckBuild when the game build isn't one the mod was checked on: the
         // panel shows only this notice and no hooks go in (0.8.0, Builds.cs).
         public static string OffNotice;
+        public static Builds.Verdict OffVerdict;   // why (for the notice in the panel's language)
+        public static string GameVersion;
         static Action<string> _info = _ => { }, _error = _ => { };
 
         public static void Init(string loader, string dataDir, string gameDir, Action<string> info, Action<string> error)
@@ -38,6 +40,8 @@ namespace RwcFormations
             if (string.IsNullOrWhiteSpace(version)) version = Builds.VersionFromSettingsFile(GameDir);
             long size = Builds.AssemblySize(GameDir);
             var verdict = Builds.Check(version, size);
+            GameVersion = version;
+            OffVerdict = verdict;
             Info($"Game build {version ?? "?"}, GameAssembly.dll {size} bytes: {verdict}.");
             if (verdict == Builds.Verdict.Known) return true;
             if (File.Exists(Path.Combine(DataDir, Builds.OverrideFile)))

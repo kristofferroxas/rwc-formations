@@ -156,7 +156,8 @@ still mirrored (it was mirrored for one seat in 0.4.0 and for the other in 0.5.0
 turned the way the camera turns (view = world for a -y seat, -world for a +y seat), x
 relative to your deployment area (main region). Fixes the preview and placing a layout
 from the other seat. Old layouts (no "frame") convert through the game as before. Share
-codes v2 (view) / v1 (old). 64/64 offline checks, installed. **Not tried in the game yet.**
+codes v2 (view) / v1 (old). 64/64 offline checks. **Kris: the preview looks right** (old
+layouts). Not seen yet: a new save in the view frame, and placing it from the other seat.
 Next chunk: openings saved from replays.
 Still to check in a game (AI or custom, not ranked):
 1. 0.2.0: the list shows only layouts that fit your board; Show all; Save opens the name

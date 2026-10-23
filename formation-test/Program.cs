@@ -166,10 +166,10 @@ var kb = Builds.Known[0];
 Check(Builds.Check(kb.Version, kb.AssemblySize) == Builds.Verdict.Known, "known build runs");
 Check(Builds.Check(kb.Version, -1) == Builds.Verdict.Known, "GameAssembly unreadable: decided on the version");
 Check(Builds.Check(kb.Version, kb.AssemblySize + 512) == Builds.Verdict.ChangedCode, "same version, new code: off");
-Check(Builds.Check("2.0.0.5.2340", kb.AssemblySize) == Builds.Verdict.UnknownVersion, "new version: off");
+Check(Builds.Check("2.0.0.9.2999", kb.AssemblySize) == Builds.Verdict.UnknownVersion, "new version: off");
 Check(Builds.Check(null, kb.AssemblySize) == Builds.Verdict.Unreadable && Builds.Check(" ", 1) == Builds.Verdict.Unreadable, "no version: off");
 Check(Builds.Notice(Builds.Verdict.Known, kb.Version, "0.8.0") == null, "no notice on a known build");
-Check(Builds.Notice(Builds.Verdict.UnknownVersion, "2.0.0.5.2340", "0.8.0").Contains("2.0.0.5.2340"), "notice names the build");
+Check(Builds.Notice(Builds.Verdict.UnknownVersion, "2.0.0.9.2999", "0.8.0").Contains("2.0.0.9.2999"), "notice names the build");
 Check(Builds.VersionFromSettings(System.Text.Encoding.ASCII.GetBytes("\0\0GameRiver\0Mechabellum\0\x01 2.0.0.4.2331\0 2022.3.62f3")) == "2.0.0.4.2331", "version found in settings bytes (not the Unity version)");
 Check(Builds.VersionFromSettings(new byte[] { 1, 2, 3 }) == null, "no version in junk");
 // Real data, read-only: this PC's game install must count as a known build.
@@ -178,7 +178,7 @@ if (Directory.Exists(RealGame))
 {
     var realVersion = Builds.VersionFromSettingsFile(RealGame);
     var realSize = Builds.AssemblySize(RealGame);
-    Check(realVersion == kb.Version && realSize == kb.AssemblySize && Builds.Check(realVersion, realSize) == Builds.Verdict.Known,
+    Check(Builds.Known.Any(b => b.Version == realVersion && b.AssemblySize == realSize) && Builds.Check(realVersion, realSize) == Builds.Verdict.Known,
           $"this PC's game ({realVersion}, {realSize} bytes) is a known build");
 }
 Check(Builds.AssemblySize(Path.GetTempPath()) == -1, "no GameAssembly.dll: size -1");
@@ -207,7 +207,7 @@ Check(zh.Values.All(v => !v.Contains("镜像")) && !Tx.Placing("A", true).Contai
 Check(Tx.Mirrored == "翻转" && Tx.MirrorMine == "翻转我的单位" && Tx.Copy == "分享" && Tx.CopyFailed("x").StartsWith("分享失败"), "reviewed words: 翻转 and 分享");
 Check(Tx.Reason("error: boom") == "error: boom", "unknown reasons pass through");
 Check(UnitInfo.Name(10) == "爬虫" && UnitInfo.Name(32) == "百夫长" && UnitInfo.Name(99999) == "单位 99999", "Chinese unit names");
-Check(Tx.Notice(Builds.Verdict.UnknownVersion, "2.0.0.5.2340", "0.9.0").Contains("2.0.0.5.2340"), "Chinese off notice names the build");
+Check(Tx.Notice(Builds.Verdict.UnknownVersion, "2.0.0.9.2999", "0.9.0").Contains("2.0.0.9.2999"), "Chinese off notice names the build");
 Tx.Zh = false;
 Check(UnitInfo.Name(10) == "Crawler" && UnitInfo.Name(99999) == "Unit 99999", "English unit names");
 Check(Tx.Result(Tx.Placing("A", true), new[] { Tx.Moved(3), Tx.Missing(1) }) == "\"A\" mirrored: 3 moved, 1 saved spots with no unit for them.", "English result sentence unchanged");

@@ -235,6 +235,10 @@ game counting as a known build. Installed for both loaders. **Off mode not seen 
 names. 126/126 offline checks, installed. **Kris: the Chinese panel works.** Translation reviewed
 by a 201 player. 0.9.1: their wording (翻转 / 分享); 128/128 offline checks, installed, zip
 rebuilt.
+0.9.2 (2026-10-23): the game patched to 2.0.0.5.2340 overnight; 0.9.1 switched itself off as
+designed. The mod compiles against the new interop; Kris tested it with the override file
+(everything works); the build is now in `Builds.Known`. First real run of the after-a-patch
+routine.
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

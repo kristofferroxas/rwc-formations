@@ -29,7 +29,8 @@ namespace RwcFormations
 
         public static readonly Build[] Known =
         {
-            new Build { Version = "2.0.0.4.2331", AssemblySize = 71137792, Note = "Steam build 25924694, checked 2026-10-22 (RWC Formations 0.1 to 0.8)" },
+            new Build { Version = "2.0.0.4.2331", AssemblySize = 71137792, Note = "Steam build 25924694, checked 2026-10-22 (RWC Formations 0.1 to 0.9.1)" },
+            new Build { Version = "2.0.0.5.2340", AssemblySize = 71201280, Note = "Steam build 26153644 (patch of 2026-10-23), checked by Kris in an AI game on 0.9.1 with the override file; mod compiles against its regenerated interop" },
         };
 
         public const string OverrideFile = "rwc-formations-allow-any-build";

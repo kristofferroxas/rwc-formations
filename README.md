@@ -231,7 +231,8 @@ preview work). Save and Paste weren't in that log: check them on the next MelonL
 game counting as a known build. Installed for both loaders. **Off mode not seen in a game yet**
 (it only shows on an unknown build).
 0.8.1: font check (Kris: Chinese draws). 0.9.0 (2026-10-22): English + Chinese panel, Chinese unit
-names. 126/126 offline checks. **Chinese panel not seen in a game yet.**
+names. 126/126 offline checks, installed. **Kris: the Chinese panel works.** Translation review
+by 201 players pending.
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

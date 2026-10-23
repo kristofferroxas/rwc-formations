@@ -8,3 +8,4 @@ __pycache__/
 # Built friend package: attach the zip to a GitHub release instead
 friend-package/*.zip
 friend-package/RwcFormations.dll
+friend-package/MelonLoader/

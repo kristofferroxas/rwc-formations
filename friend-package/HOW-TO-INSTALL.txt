@@ -1,14 +1,22 @@
-﻿RWC Formations 0.6.0 (private copy, please don't pass it on)
+﻿RWC Formations 0.9.0 (private copy, please don't pass it on)
 =============================================================
 
 Save your unit positioning in Mechabellum and put it back with a click, as saved or
-mirrored left to right. Layouts can be shared as text codes.
+mirrored left to right. Mini-map preview, undo, and share codes for trading layouts.
+English and Chinese (follows the game's language).
 
-What you need: Mechabellum on Steam (Windows) and BepInEx 6, a free mod loader.
+What you need: Mechabellum (Windows) and a mod loader: BepInEx 6 (most players) or
+MelonLoader (common in the 201 / Chinese community). Use ONE of them, not both.
+
+This zip has:
+- RwcFormations.dll                  the mod for BepInEx
+- MelonLoader\RwcFormations.dll      the mod for MelonLoader
+- Install or update.bat + install.ps1  one-click setup for BepInEx
+- HOW-TO-INSTALL.txt                 this file
 
 
-Quick way: one click
---------------------
+A. BepInEx, quick way (one click)
+---------------------------------
 1. Close Mechabellum.
 2. Unzip this package (right-click > Extract All). Don't run it from inside the zip.
 3. Double-click "Install or update.bat".
@@ -21,11 +29,9 @@ Quick way: one click
 For a newer version of the mod, unzip the new package and run "Install or update.bat"
 again: it only replaces the mod.
 
-If the quick way doesn't work, do it by hand:
 
-
-1. Install BepInEx (once)
--------------------------
+B. BepInEx by hand
+------------------
 - Download this exact file (build 788, the one this mod was tested with):
   https://builds.bepinex.dev/projects/bepinex_be/788/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.788%2B5b766a3.zip
   (the official BepInEx build page: https://builds.bepinex.dev/projects/bepinex_be )
@@ -33,41 +39,47 @@ If the quick way doesn't work, do it by hand:
   It's usually C:\Program Files (x86)\Steam\steamapps\common\Mechabellum
 - Unzip everything into that folder, so winhttp.dll, doorstop_config.ini, a dotnet folder
   and a BepInEx folder sit next to Mechabellum.exe.
-- Start the game once and wait. The first start takes a few minutes longer while BepInEx
-  sets itself up (it may look stuck: let it finish). Then close the game.
+- Start the game once and wait (the first start is slow), then close it.
+- Put RwcFormations.dll (from this zip's top level) into BepInEx\plugins.
 
 
-2. Install the mod
-------------------
-- Put RwcFormations.dll into the BepInEx\plugins folder (create "plugins" if it's missing).
-- Start the game.
+C. MelonLoader
+--------------
+- If MelonLoader isn't installed yet: get it from its official page,
+  https://github.com/LavaGang/MelonLoader/releases (tested with v0.7.3,
+  MelonLoader.x64.zip: unzip it into the game folder), start the game once and wait (the
+  first start is slow, and it may install Microsoft's .NET 6), then close it.
+- Put MelonLoader\RwcFormations.dll from this zip into the game's Mods folder.
+- Your layouts are kept in UserData\rwc-formations.json.
 
 
-3. Use it
----------
+Use it
+------
 During deployment a panel shows in the top-right corner (F6 shows or hides it).
 - Save current: saves your units' positions, then type a name and press Enter.
 - Place / Mirrored: puts your units on a saved layout, as saved or flipped left to right.
 - Mirror my units: flips your current board left to right.
 - Revert: undoes the last Place or Mirror.
 - Hover a layout: a mini-map preview shows beside the panel.
-- Copy / Paste: share a layout as a text code (paste the code in Discord; your friend
-  copies it and clicks Paste).
+- Copy / Paste: share a layout as a text code (send the code to a friend; they copy it
+  and click Paste).
 - The list only shows layouts you have the units for. Show all lists the rest.
 - Only units bought this round move. Units from earlier rounds stay where they are.
 - Hotkeys: Ctrl+Alt+1..9 places layout 1..9 in the list, add Shift for mirrored.
+- Language: the panel follows the game (English or Chinese). To choose, put a file named
+  rwc-formations-language containing en or zh next to your layouts file.
 
-Your layouts are saved in BepInEx\rwc-formations.json.
+Your layouts are saved in BepInEx\rwc-formations.json (MelonLoader: UserData\).
 
 
 Good to know
 ------------
-- Try it in a game against the AI or a custom game first.
-- Mechabellum's publisher (Dreamhaven) has user terms that bar unauthorised mods. The
-  game's creator has said on Discord that custom game mods are OK, but use it at your own
-  risk, especially in ranked.
-- After a game update the first start is slow again (BepInEx rebuilds its files). If the
-  mod stops working after an update, tell the person who sent it to you.
-- To turn all mods off: rename winhttp.dll in the game folder (rename it back to turn them
-  on). To remove the mod: delete RwcFormations.dll.
-- If something goes wrong, send BepInEx\LogOutput.log to the person who sent you the mod.
+- The game's creator has okayed modding. Try it in a game against the AI first.
+- After a Mechabellum update the mod switches itself off and says so in the panel,
+  until an updated version is out. That's on purpose: nothing breaks in your game.
+- After a game update the first start is slow again (the loader rebuilds its files).
+- To turn all mods off: BepInEx, rename winhttp.dll in the game folder; MelonLoader,
+  rename version.dll (rename it back to turn them on). To remove only this mod: delete
+  RwcFormations.dll.
+- If something goes wrong, send the log to the person who sent you the mod:
+  BepInEx\LogOutput.log, or MelonLoader\Latest.log.

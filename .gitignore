@@ -9,3 +9,4 @@ __pycache__/
 friend-package/*.zip
 friend-package/RwcFormations.dll
 friend-package/MelonLoader/
+friend-package/LICENSE

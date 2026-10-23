@@ -95,8 +95,9 @@ localization manager); a file named `rwc-formations-language` in the data folder
 (`name_zh` in the dump's `units.json`, all 101 units; `make_unit_info.py`). Layout names
 stay as typed; log lines stay English for bug reports. The panel's built-in font draws
 Chinese (font check, 0.8.1: `FontCheck.cs`, on only with a `rwc-formations-fonttest`
-file). **The Chinese is a first draft: have a native speaker review `Text.cs` before
-release.**
+file). The Chinese was reviewed by a 201 player, llxmod-院长大人 (2026-10-22): clear overall, but
+镜像 (Mirrored) and 复制 (Copy) side by side read as the same thing, so since 0.9.1
+Mirrored = 翻转 (flip) and the Copy button = 分享 (share).
 
 ## Version safety (0.8.0)
 
@@ -231,8 +232,9 @@ preview work). Save and Paste weren't in that log: check them on the next MelonL
 game counting as a known build. Installed for both loaders. **Off mode not seen in a game yet**
 (it only shows on an unknown build).
 0.8.1: font check (Kris: Chinese draws). 0.9.0 (2026-10-22): English + Chinese panel, Chinese unit
-names. 126/126 offline checks, installed. **Kris: the Chinese panel works.** Translation review
-by 201 players pending.
+names. 126/126 offline checks, installed. **Kris: the Chinese panel works.** Translation reviewed
+by a 201 player. 0.9.1: their wording (翻转 / 分享); 128/128 offline checks, installed, zip
+rebuilt.
 
 Online play: the devs have said they're fine with modding, and the mod only sends moves
 you could make by hand. Still, try it outside ranked first.

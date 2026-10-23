@@ -17,8 +17,8 @@ namespace RwcFormations
     {
         public const string SwitchFile = "rwc-formations-fonttest";
         // 字体测试 = "font test"; 爬虫 Crawler, 火獾 Fire Badger, 堡垒 Fortress (the game's names).
-        public const string Sample = "字体测试: 爬虫 火獾 堡垒 / 保存 放置 镜像 撤销 粘贴";
-        static readonly char[] Probe = { '爬', '獾', '保', '镜' };
+        public const string Sample = "字体测试: 爬虫 火獾 堡垒 / 保存 放置 翻转 撤回 粘贴";
+        static readonly char[] Probe = { '爬', '獾', '保', '翻' };
 
         static bool? _on;
         static bool _logged;

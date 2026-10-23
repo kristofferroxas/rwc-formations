@@ -3,7 +3,10 @@
 // (a language code starting "zh" = Chinese, see Panel.RefreshLanguage), or a file
 // named rwc-formations-language in the data folder containing "en" or "zh".
 // Layout names stay as the player typed them. Log lines stay English (bug reports).
-// The Chinese is a first draft: have a native speaker review it before release.
+// The Chinese: first draft reviewed by a 201 player (llxmod-院长大人, 2026-10-22): "the
+// rest is clear", but 镜像 (mirrored) and 复制 (copy) side by side on a row read as the
+// same thing. So Mirrored = 翻转 (flip) everywhere and the Copy button = 分享 (share);
+// 复制 stays only where it means copying to the clipboard.
 using System.Collections.Generic;
 
 namespace RwcFormations
@@ -29,7 +32,7 @@ namespace RwcFormations
 
         // Main buttons
         public static string SaveCurrent => P("Save current", "保存当前");
-        public static string MirrorMine => P("Mirror my units", "镜像我的单位");
+        public static string MirrorMine => P("Mirror my units", "翻转我的单位");
         public static string Revert(int steps) => steps > 1 ? P($"Revert ({steps})", $"撤回 ({steps})") : P("Revert", "撤回");
 
         // Name box
@@ -48,15 +51,15 @@ namespace RwcFormations
         public static string NoneFit => P("None of your layouts fit the units on your board.", "没有阵型适合你场上的单位。");
         public static string Fillable(int have, int total) => P($"{have} of {total}", $"{have}/{total}");
         public static string Place => P("Place", "放置");
-        public static string Mirrored => P("Mirrored", "镜像");
+        public static string Mirrored => P("Mirrored", "翻转");
         public static string NameButton => P("Name", "命名");
-        public static string Copy => P("Copy", "复制");
+        public static string Copy => P("Copy", "分享");
         public static string Sure => P("sure?", "确定?");
         public static string Page(int page, int pages) => P($"page {page} of {pages}", $"第 {page}/{pages} 页");
 
         // Preview
         public static string PreviewTitle(string name, bool mirror) =>
-            Zh ? $"{name}{(mirror ? "（镜像）" : "")}：上方为前线" : $"{name}{(mirror ? " (mirrored)" : "")}: front is at the top";
+            Zh ? $"{name}{(mirror ? "（翻转）" : "")}：上方为前线" : $"{name}{(mirror ? " (mirrored)" : "")}: front is at the top";
 
         // Messages
         public static string CantSave(string why) => P("Can't save: ", "无法保存：") + Reason(why);
@@ -64,10 +67,10 @@ namespace RwcFormations
         public static string Saved(string name, int n) =>
             P($"Saved {Q(name)} ({n} units). Type a name and press Enter, or OK to keep it.", $"已保存{Q(name)}（{n} 个单位）。输入名称后按回车，或点确定保留原名。");
         public static string Named(string name, string old) => P($"Named {Q(name)} (was {Q(old)}).", $"已命名为{Q(name)}（原名{Q(old)}）。");
-        public static string CantMirror(string why) => P("Can't mirror: ", "无法镜像：") + Reason(why);
-        public static string MirroredYours => P("Mirrored your units", "已镜像你的单位");
+        public static string CantMirror(string why) => P("Can't mirror: ", "无法翻转：") + Reason(why);
+        public static string MirroredYours => P("Mirrored your units", "已翻转你的单位");
         public static string CantPlace(string why) => P("Can't place: ", "无法放置：") + Reason(why);
-        public static string Placing(string name, bool mirror) => Q(name) + (mirror ? P(" mirrored", "（镜像）") : "");
+        public static string Placing(string name, bool mirror) => Q(name) + (mirror ? P(" mirrored", "（翻转）") : "");
         public static string Moved(int n) => P($"{n} moved", $"移动 {n} 个");
         public static string AlreadyThere(int n) => P($"{n} already in place", $"{n} 个已在位置上");
         public static string Refused(int n, string detail) => P($"{n} refused by the game ({detail})", $"游戏拒绝 {n} 个（{detail}）");
@@ -78,8 +81,8 @@ namespace RwcFormations
         public static string NoLayoutNumber(int n) => P($"No layout {n} in the list.", $"列表中没有第 {n} 个阵型。");
         public static string Copied(string name, int length) =>
             P($"Copied {Q(name)} as a share code ({length} characters). Paste it in Discord; friends add it with Paste.",
-              $"已将{Q(name)}复制为分享码（{length} 个字符）。发给朋友后，对方点“粘贴”即可添加。");
-        public static string CopyFailed(string why) => P("Copy failed: ", "复制失败：") + why;
+              $"已将{Q(name)}的分享码复制到剪贴板（{length} 个字符）。发给朋友后，对方点“粘贴”即可添加。");
+        public static string CopyFailed(string why) => P("Copy failed: ", "分享失败：") + why;
         public static string ClipboardUnreadable(string why) => P("Couldn't read the clipboard: ", "无法读取剪贴板：") + why;
         public static string PasteFailed(string error) => P("Paste: ", "粘贴：") + Reason(error) + Stop;
         public static string AlreadyHave(string name) => P($"You already have this layout as {Q(name)}.", $"你已经有这个阵型了：{Q(name)}。");

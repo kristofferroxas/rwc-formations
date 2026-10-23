@@ -201,7 +201,10 @@ Tx.Zh = false; var en = props.ToDictionary(pp => pp.Name, pp => (string)pp.GetVa
 Tx.Zh = true; var zh = props.ToDictionary(pp => pp.Name, pp => (string)pp.GetValue(null));
 foreach (var pp in props) Check(en[pp.Name] != zh[pp.Name], $"Tx.{pp.Name} is translated");
 Check(Tx.Saved("Rush", 7).Contains("“Rush”") && Tx.Saved("Rush", 7).Contains("7"), "Chinese message keeps the layout name and numbers");
-Check(Tx.Result(Tx.Placing("A", true), new[] { Tx.Moved(3), Tx.Missing(1) }) == "“A”（镜像）：移动 3 个，1 个位置没有对应的单位。", "Chinese result sentence");
+Check(Tx.Result(Tx.Placing("A", true), new[] { Tx.Moved(3), Tx.Missing(1) }) == "“A”（翻转）：移动 3 个，1 个位置没有对应的单位。", "Chinese result sentence");
+// The 201 review (0.9.1): nothing says 镜像 any more, and the row's Flip and Share buttons differ.
+Check(zh.Values.All(v => !v.Contains("镜像")) && !Tx.Placing("A", true).Contains("镜像") && !Tx.PreviewTitle("A", true).Contains("镜像"), "no 镜像 left (Mirrored = 翻转)");
+Check(Tx.Mirrored == "翻转" && Tx.MirrorMine == "翻转我的单位" && Tx.Copy == "分享" && Tx.CopyFailed("x").StartsWith("分享失败"), "reviewed words: 翻转 and 分享");
 Check(Tx.Reason("error: boom") == "error: boom", "unknown reasons pass through");
 Check(UnitInfo.Name(10) == "爬虫" && UnitInfo.Name(32) == "百夫长" && UnitInfo.Name(99999) == "单位 99999", "Chinese unit names");
 Check(Tx.Notice(Builds.Verdict.UnknownVersion, "2.0.0.5.2340", "0.9.0").Contains("2.0.0.5.2340"), "Chinese off notice names the build");

@@ -1,13 +1,22 @@
 # RWC Formations
 
-A BepInEx 6 (IL2CPP) plugin for Mechabellum: save your unit positioning, then put it
-back with a click, as saved or mirrored left to right. Separate from the sim plugin
-(`sim-plugin/`, RwcSimProbe); **not part of the website, never deployed.**
+A Mechabellum mod: save your unit positioning, then put it back with a click, as saved or
+mirrored left to right. Mini-map preview, undo, share codes for trading layouts, English
+and Chinese. Works with **BepInEx 6** and **MelonLoader**. Free to use and share (MIT
+licence, see `LICENSE`). The game's creator has okayed modding.
 
-> **Players:** this repository is private, please don't share it. Download the latest
-> `RWC-Formations-x.y.z.zip` from **Releases** (right-hand side of this page), unzip it,
-> close Mechabellum and double-click `Install or update.bat`. `HOW-TO-INSTALL.txt` in the
-> zip has the details and the manual steps. For a new version, do the same again.
+> **Players:** download the latest `RWC-Formations-x.y.z.zip` from
+> [**Releases**](https://github.com/kristofferroxas/rwc-formations/releases/latest)
+> (use the zip under *Assets*, not "Source code"), unzip it, and:
+> - **BepInEx:** close Mechabellum and double-click `Install or update.bat`.
+> - **MelonLoader:** put `MelonLoader/RwcFormations.dll` into the game's `Mods` folder.
+>
+> `HOW-TO-INSTALL.txt` in the zip has the details and the manual steps. For a new
+> version, do the same again. After a Mechabellum update the mod switches itself off until
+> a version cleared for that update is out.
+
+Developer notes follow. Part of the RWC (Rhino Wasp Cult) Mechabellum tools; separate from
+the RWC sim plugin.
 
 ## Use
 
@@ -119,13 +128,14 @@ Mirrored, Revert, preview, Copy/Paste), read the new version and size from the l
 them to `Builds.Known`, update the real-data check in `formation-test/`, release, and
 delete the override file.
 
-## Releasing to friends (private GitHub repo)
+## Releasing (GitHub)
 
 `formation-plugin/` is its own git repo: https://github.com/kristofferroxas/rwc-formations
-(PRIVATE; friends are added as collaborators, Settings > Collaborators). For a new version:
-bump `Plugin.Version`, build, run `formation-test/`, rebuild `friend-package/` (copy the DLL
-in, update the version in HOW-TO-INSTALL.txt, zip DLL + txt + bat + ps1 as
-`RWC-Formations-x.y.z.zip`), commit and push, then
+(PUBLIC since 2026-10-23, MIT licence; commits use the GitHub no-reply email). For a new
+version: bump `Host.Version`, build both projects, run `formation-test/`, rebuild
+`friend-package/` (copy both DLLs in, update the version in HOW-TO-INSTALL.txt, zip
+`RwcFormations.dll`, `MelonLoader/RwcFormations.dll`, the txt, bat, ps1 and `LICENSE` as
+`RWC-Formations-x.y.z.zip` with forward slashes), commit and push, then
 `gh release create vX.Y.Z friend-package/RWC-Formations-x.y.z.zip` with the zip's SHA-256
 in the notes. Built files (bin/, obj/, the zip, the DLL copy) stay out of git.
 

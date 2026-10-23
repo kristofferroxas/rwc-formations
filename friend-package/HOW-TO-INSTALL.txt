@@ -1,5 +1,8 @@
-﻿RWC Formations 0.9.2 (private copy, please don't pass it on)
-=============================================================
+﻿RWC Formations 0.9.2
+====================
+
+Free to use and share (MIT licence, see LICENSE). Latest version:
+https://github.com/kristofferroxas/rwc-formations/releases/latest
 
 Save your unit positioning in Mechabellum and put it back with a click, as saved or
 mirrored left to right. Mini-map preview, undo, and share codes for trading layouts.
@@ -13,6 +16,7 @@ This zip has:
 - MelonLoader\RwcFormations.dll      the mod for MelonLoader
 - Install or update.bat + install.ps1  one-click setup for BepInEx
 - HOW-TO-INSTALL.txt                 this file
+- LICENSE                            the MIT licence
 
 
 A. BepInEx, quick way (one click)
@@ -81,5 +85,6 @@ Good to know
 - To turn all mods off: BepInEx, rename winhttp.dll in the game folder; MelonLoader,
   rename version.dll (rename it back to turn them on). To remove only this mod: delete
   RwcFormations.dll.
-- If something goes wrong, send the log to the person who sent you the mod:
+- If something goes wrong, send the log to the person who sent you the mod, or open an
+  issue at https://github.com/kristofferroxas/rwc-formations/issues :
   BepInEx\LogOutput.log, or MelonLoader\Latest.log.
